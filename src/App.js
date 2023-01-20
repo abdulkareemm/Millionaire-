@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./App.css";
-import { Trivia } from "./components";
+import { Timer, Trivia } from "./components";
 
 function App() {
   const [questionNumber, setQuestionNumber] = useState(1);
-  const [timeOut,setTimeOut] = useState(false)
+  const [stop,setStop] = useState(false)
+  const [earned,setEarned] = useState(0)
   const data = [
     {
       id: 1,
@@ -73,7 +74,7 @@ function App() {
       ],
     },
   ];
-  const moneyPyramid = [
+  const moneyPyramid =useMemo(()=>[
     { id: 1, amount: 100 },
     { id: 2, amount: 200 },
     { id: 3, amount: 300 },
@@ -89,22 +90,33 @@ function App() {
     { id: 13, amount: 250000 },
     { id: 14, amount: 500000 },
     { id: 15, amount: 1000000 },
-  ].reverse();
+  ].reverse(),[]) 
+  useEffect(()=>{
+    questionNumber>1&&setEarned(moneyPyramid.find((m)=>m.id===questionNumber-1).amount)
+  },[questionNumber,moneyPyramid])
 
   return (
     <div className="app">
       <div className="main">
-        <div className="top">
-          <div className="timer">30</div>
-        </div>
-        <div className="bottom">
-          <Trivia
-            data={data}
-            setTimeOut={setTimeOut}
-            setQuestionNumber={setQuestionNumber}
-            questionNumber={questionNumber}
-          />
-        </div>
+        {stop ? (
+          <h1 className="endText">You earned: ${earned}</h1>
+        ) : (
+          <>
+            <div className="top">
+              <div className="timer">
+                <Timer setStop={setStop} questionNumber={questionNumber}/>
+              </div>
+            </div>
+            <div className="bottom">
+              <Trivia
+                data={data}
+                setStop={setStop}
+                setQuestionNumber={setQuestionNumber}
+                questionNumber={questionNumber}
+              />
+            </div>
+          </>
+        )}
       </div>
       <div className="pyramid">
         <ul className="moneyList">
